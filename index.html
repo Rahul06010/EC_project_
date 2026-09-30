@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Introduction to JavaScript</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+      integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #1a202c; /* Dark background */
+        color: #f7fafc; /* Light text */
+        transition: background-color 0.5s ease;
+      }
+      .slide {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        text-align: center;
+        box-sizing: border-box;
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: opacity 0.5s ease;
+      }
+      .slide.active {
+        opacity: 1;
+        z-index: 10;
+      }
+      .slide-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #90cdf4; /* Lighter blue for titles */
+        margin-bottom: 1.5rem;
+      }
+
+      .slide-content {
+        font-size: 1.25rem;
+        font-weight: 400;
+        max-width: 1000px;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        max-height: 500px;
+      }
+
+      /* Buttons */
+      .nav-button {
+        background-color: #4a5568;
+        color: #f7fafc;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        cursor: pointer;
+        border: none;
+        outline: none;
+      }
+
+      .nav-button:hover {
+        background-color: #718096;
+        transform: scale(1.05);
+      }
+
+      .nav-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: scale(1);
+      }
+
+      /* Vertical Progress Bar */
+      .progress-bar {
+        background-color: #4a5568;
+        width: 8px;
+        height: 150px;
+        border-radius: 9999px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-fill {
+        background-color: #4299e1;
+        width: 100%;
+        height: 0%;
+        border-radius: 9999px;
+        transition: height 0.5s ease;
+        position: absolute;
+        bottom: 0;
+      }
+
+      pre {
+        background-color: #2d3748;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto; /* Horizontal scroll */
+        overflow-y: auto; /* Vertical scroll */
+        max-width: 100%;
+        max-height: 300px; /* Adjust height limit as needed */
+        margin-top: 20px;
+      }
+      pre::-webkit-scrollbar {
+        display: none;
+      }
+
+      code {
+        font-family: "Courier New", Courier, monospace;
+        text-align: left;
+        display: block;
+        white-space: pre; /* Preserve spaces/line breaks */
+      }
+    </style>
+  </head>
+  <body class="overflow-hidden">
+    <!-- Main container for the slides -->
+    <div id="slides-container" class="relative w-screen h-screen"></div>
+
+    <div
+      class="fixed top-0 right-0 h-full flex flex-col items-center justify-center p-4 z-20 bg-gray-800"
+    >
+      <button id="prevBtn" class="nav-button nav-prev font-semibold mb-4">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+
+      <!-- Vertical Progress Bar -->
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+
+      <button id="nextBtn" class="nav-button nav-next font-semibold mt-4">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <script>
+      // Array of slide data. This has been updated to include core JavaScript topics with examples.
+      const slidesData = [
+        {
+          title: "Error Handling in JavaScript.",
+          content: `Types of Errors in JavaScript
+                  <pre><code>
+Syntax Errors – Mistakes in the code structure (e.g., missing brackets).
+
+Runtime Errors – Errors that happen while the code is running (e.g., accessing undefined).
+
+Logical Errors – The code runs but gives the wrong result (harder to catch).
+                  </code></pre>`,
+        },
+        {
+          title: "Main Topics of JS",
+          content: `Callback Hell -> Promise chans -> Async/Await
+                  <pre><code>
+    Sync: one by one, blocking.
+
+    Async: non-blocking, background tasks.
+
+    Callbacks: functions executed later.
+
+    Callback Hell: messy nested callbacks.
+
+    Promises: cleaner async handling.
+
+    Async/Await: modern, readable async code.
+                  </code></pre>`,
+        },
+        {
+          title: "Synchronous (sync) in JavaScript",
+          content: ` <pre><code>1. Code executes line by line (one after another).
+2. Each statement must finish before the next one starts.
+
+      Example:
+      console.log("Step 1");
+      console.log("Step 2");
+      console.log("Step 3");
+
+      </code></pre>`,
+        },
+        {
+          title: "Asynchronous (async) in JavaScript",
+          content: ` <pre><code>1. Code that does not block execution.
+2. Runs in the background, and when finished, a callback or promise handles the result.
+
+      Example with setTimeout:
+
+      console.log("Start");
+
+      setTimeout(() => {
+        console.log("Async task done!");
+      }, 2000);
+
+      console.log("End");
+
+      </code></pre>`,
+        },
+        {
+          title: "Callback in JavaScript",
+          content: ` <pre><code>A function passed into another function to be executed later.
+
+      Example:
+
+      function greet(name, callback) {
+        console.log("Hello " + name);
+        callback();
+      }
+
+      function bye() {
+        console.log("Goodbye!");
+      }
+
+      greet("Raj", bye);
+
+      </code></pre>`,
+        },
+        {
+          title: "Callback Hell in JavaScript",
+          content: ` <pre><code>When you nest too many callbacks, the code becomes messy and hard to manage.
+Looks like a “pyramid of doom” → hard to debug & maintain.
+
+      Example:
+
+      setTimeout(() => {
+        console.log("Step 1");
+        setTimeout(() => {
+          console.log("Step 2");
+          setTimeout(() => {
+            console.log("Step 3");
+          }, 1000);
+        }, 1000);
+      }, 1000);
+
+
+      </code></pre>`,
+        },
+        {
+          title: "Promises in JavaScript",
+          content: ` <pre><code>A Promise represents a value that will be available now, later, or never.
+
+      Has 3 states:
+
+      Pending (waiting)
+      Resolved (fulfilled) (success)
+      Rejected (error)
+
+      Example:
+
+      let myPromise = new Promise((resolve, reject) => {
+        let success = true;
+        if (success) {
+          resolve("Task done!");
+        } else {
+          reject("Something went wrong");
+        }
+      });
+
+      myPromise
+        .then(result => console.log(result)) // if success
+        .catch(error => console.log(error)); // if error
+
+      </code></pre>`,
+        },
+        {
+          title: "Async / Await in JavaScript",
+          content: ` <pre><code>1. Cleaner way to handle promises.
+2. Looks synchronous, but is asynchronous.
+
+      Example:
+
+      function fetchData() {
+        return new Promise(resolve => {
+          setTimeout(() => resolve("Data received"), 2000);
+        });
+      }
+
+      async function getData() {
+        console.log("Fetching...");
+        let data = await fetchData(); // wait until resolved
+        console.log(data);
+        console.log("Done!");
+      }
+
+      getData();
+
+      </code></pre>`,
+        },
+        {
+          title: "Summary",
+          content: ` <pre><code>Sync: one by one, blocking.
+
+Async: non-blocking, background tasks.
+
+Callbacks: functions executed later.
+
+Callback Hell: messy nested callbacks.
+
+Promises: cleaner async handling.
+
+Async/Await: modern, readable async code.
+      </code></pre>`,
+        },
+
+        {
+          title: "Classes",
+          content: `Classes are a template for creating objects. In JavaScript, a class is a blueprint for creating objects. It lets you group properties (data) and methods (functions) into one reusable structure..
+                                                    <pre><code>class Dog {
+                                      constructor(name) {
+                                        this.name = name;
+                                      }
+                                      bark() {
+                                        console.log(this.name + ' says woof!');
+                                      }
+                                    }
+                                    let myDog = new Dog('Fido');
+                                    myDog.bark(); // Output: Fido says woof!</code></pre>`,
+        },
+        {
+          title: "BOM (Browser Object Modal) ",
+          content: `The BOM represents the browser itself, not the page content.
+
+            It allows JavaScript to interact with the browser (not just the document).
+
+            Includes objects like window, navigator, location, screen, and history.
+                                                    <pre><code><img style="margin:20px; width: 100%" src="images/bom_2.jpg"/>
+            // Alert box
+            window.alert("Hello!");
+
+            // Console log (same as console.log)
+            window.console.log("Hi!");
+
+            // Accessing location (URL)
+            console.log(window.location.href);
+
+            // Width and height of the window
+            console.log(window.innerWidth, window.innerHeight);
+
+            </code></pre>`,
+        },
+        {
+          title: "DOM (Document Object Modal)",
+          content: `document is part of the window object (window.document).
+
+            DOM represents the HTML structure of your page in a tree format.
+
+            You use DOM methods to access and manipulate HTML elements.
+                                                    <pre><code><img style="margin:20px; width: 100%" src="images/dom_2.jpg"/>
+            // Access element by ID
+            let heading = document.getElementById("title");
+            heading.style.color = "red";
+
+            // Access all paragraphs
+            let paras = document.getElementsByTagName("p");
+            console.log(paras);
+
+            // Query Selector
+            let btn = document.querySelector(".myButton");
+            btn.addEventListener("click", () => {
+              alert("Button clicked!");
+            });
+            </code></pre>`,
+        },
+        {
+          title: "Introduction to JavaScript",
+          content: `
+                                      "JavaScript is a high-level, dynamic programming language used to make web pages interactive." Client-side language: Runs directly in your browser (no need to install extra software to view it). Birth of JavaScript (1995) and Created by Brendan Eich. Original Name: Mocha, later LiveScript, finally renamed JavaScript for marketing reasons (Java was hot at the time).`,
+        },
+        {
+          title: "Write Our 1st Code",
+          content: `console.log() It is used to print a message to the console .
+                                                    <pre><code>
+                              Check in chrome console or create file any name with .js extention
+                              console.log("Hello World")
+                              // Output : Hello World
+                                                       </code></pre>`,
+        },
+        {
+          title: "Code Editer",
+          content: `It is like notebook.
+                                                    <pre><code>
+                              * VS Code (Visual Studio Code)
+                              * Subline
+                                                       </code></pre>`,
+        },
+        {
+          title: "How To Use JS in Html",
+          content: `<pre><code>
+                              &lt;!DOCTYPE html&gt;
+                              &lt;html&gt;
+                              &lt;head&gt;
+                                &lt;title&gt;JavaScript in HTML&lt;/title&gt;
+                              &lt;/head&gt;
+                              &lt;body&gt;
+                                &lt;h1 id="heading"&gt;Hello, World!&lt;/h1&gt;
+                                &lt;button onclick="changeText()"&gt;Click Me&lt;/button&gt;
+
+                                // Use internally
+                                &lt;script&gt;
+                                  function changeText() {
+                                    document.getElementById("heading").textContent = "You clicked the button!";
+                                  }
+                                &lt;/script&gt;
+                                 // Use externally
+                                &lt;script src="fileName.js"&gt;&lt;/script&gt;
+                              &lt;/body&gt;
+                              &lt;/html&gt;
+                              </code></pre>`,
+        },
+
+        {
+          title: "Variables",
+          content: `Variables are containers for storing data values.
+                                                    <pre><code>
+                              name = 'Alice'
+                              age = 30;</code></pre>`,
+        },
+        {
+          title: "What are Var, let, and const keywords",
+          content: `
+                                                    <pre><code>
+            Var : Old way to declare variable, It can be re-declared and update. It's a global scope variable.
+
+            let : New way to declare variable, It cann't be re-declared only can update. It's a block scope variable.
+
+            const : New way to declare variable, It cann't be re-declared even cann't update. It's a block scope variable.
+
+            Example Of var :
+            var x = 10;
+             var x = 20;
+            var x = 30;
+            console.log(x); // 30 (not good practice!)
+
+            Example Of let :
+            let y = 30;
+            y = 40;
+            y = 50;
+            console.log(y); // 50 (good practice!)
+
+            Example Of const :
+            const z = 10;
+            z = 20;
+            console.log(z); // 30 (cann't re-declared!)
+                               </code></pre>`,
+        },
+        {
+          title: "Data Types",
+          content: `There are several data types, including .
+                                                    <pre><code>String  // "Alica",
+            Number // 24,
+            Boolean // true / false,
+            Undefined ,
+            Null  // null,
+            Object // {} object
+            Array // [] object
+            function // object
+                              </code></pre>`,
+        },
+        {
+          title: "Array's Methods",
+          content: `Adding / Removing Elements
+                                                    <pre><code>
+                  | Method                                   | Description                         | Example                 |
+                  | ---------------------------------------- | ----------------------------------- | ----------------------- |
+                  | **push()**                               | Adds element(s) to the end          | arr.push(4)           |
+                  | **pop()**                                | Removes last element                | arr.pop()             |
+                  | **unshift()**                            | Adds element(s) to the start        | arr.unshift(0)        |
+                  | **shift()**                              | Removes first element               | arr.shift()           |
+                  | **splice(start, deleteCount, ...items)** | Adds/removes at specific index      | arr.splice(2, 1, "x") |
+                  | **slice(start, end)**                    | Returns a portion (non-destructive) | arr.slice(1, 3)       |
+
+                              </code></pre>`,
+        },
+        {
+          title: "Array's Methods",
+          content: `Searching / Checking
+                                                    <pre><code>| Method                  | Description                | Example                     |
+            | ----------------------- | -------------------------- | --------------------------- |
+            | **includes()**          | Checks if value exists     | arr.includes(3)           |
+            | **indexOf()**           | First index of value       | arr.indexOf(3)            |
+            | **lastIndexOf()**       | Last index of value        | arr.lastIndexOf(3)        |
+            | **find(callback)**      | First element that matches | arr.find(x => x > 5)      |
+            | **findIndex(callback)** | Index of first match       | arr.findIndex(x => x > 5) |
+
+                              </code></pre>`,
+        },
+        {
+          title: "Array's Methods",
+          content: `Transforming
+                                                    <pre><code>
+            | Method                        | Description                       | Example                          |
+            | ----------------------------- | --------------------------------- | -------------------------------- |
+            | **map(callback)**             | Creates new array by transforming | arr.map(x => x * 2)            |
+            | **filter(callback)**          | New array with matches            | arr.filter(x => x > 5)         |
+            | **reduce(callback, initial)** | Reduces to single value           | arr.reduce((a, b) => a + b, 0) |
+            | **reduceRight()**             | Like reduce but from right        | arr.reduceRight(...)           |
+            | **flat()**                    | Flattens nested arrays            | [1,[2,3]].flat()               |
+                              </code></pre>`,
+        },
+        {
+          title: "Array's Methods",
+          content: `Sorting / Reordering
+                                                    <pre><code>
+            | Method        | Description           | Example                     |
+            | ------------- | --------------------- | --------------------------- |
+            | **sort()**    | Sorts array (mutates) | arr.sort((a, b) => a - b) |
+            | **reverse()** | Reverses order        | arr.reverse()             |
+
+                              </code></pre>`,
+        },
+        {
+          title: "Array's Methods",
+          content: `Joining / Converting
+                                                    <pre><code>
+            | Method              | Description                 | Example               |
+            | ------------------- | --------------------------- | --------------------- |
+            | **join(separator)** | Combines to string          | arr.join("-")       |
+            | **toString()**      | Converts to comma string    | arr.toString()      |
+            | **Array.from()**    | Creates array from iterable | Array.from("hello") |
+            | **Array.isArray()** | Checks if value is array    | Array.isArray(arr)  |
+
+                              </code></pre>`,
+        },
+        {
+          title: "Array's Methods",
+          content: `Iterating
+                                                    <pre><code>
+                        | Method                | Description                 | Example                             |
+                        | --------------------- | --------------------------- | ----------------------------------- |
+                        | **forEach(callback)** | Loops through items         | arr.forEach(x => console.log(x))  |
+                        | **keys()**            | Iterator of indexes         | for (let k of arr.keys())         |
+                        | **values()**          | Iterator of values          | for (let v of arr.values())       |
+                        | **entries()**         | Iterator of \[index, value] | for (let [i, v] of arr.entries()) |
+
+                              </code></pre>`,
+        },
+
+        {
+          title: "Modern JavaScript: ES6",
+          content: `The release of ECMAScript 2015 (ES6). It introduced of new features let, const, arrow functions ()=>{}, destructuring, template literals,Spread & Rest Operators, classes, modules, promises, default parameters, Map/Set.`,
+        },
+        {
+          title: "What are Operators",
+          content: `In JavaScript, operators are special symbols or keywords that perform operations on values (operands).
+            They’re like the “verbs” of JavaScript — telling your code to add, compare, assign, combine, and more..
+                                                    <pre><code>1. Arithmetic Operators
+            2. Assignment Operators
+            3. Comparison Operators
+            4. Logical Operators
+            5. String Operators
+            6. Ternary Operator
+
+                                                      </code></pre>`,
+        },
+        {
+          title: "Arithmetic Operators (for math operations)",
+          content: `Operators are used to perform operations on variables and values.
+                                                    <pre><code>| Operator | Example  | Result                |
+            | -------- | -------- | --------------------- |
+            | +      | 5 + 2  | 7                   |
+            | -      | 5 - 2  | 3                   |
+            | *      | 5 * 2  | 10                  |
+            | /      | 5 / 2  | 2.5                 |
+            | %      | 5 % 2  | 1 (remainder)       |
+            | **     | 5 ** 2 | 25 (exponentiation) |
+            | ++     | x++    | increment by 1        |
+            | --     | x--    | decrement by 1        |
+            </code></pre>`,
+        },
+        {
+          title: "Assignment Operators (store values)",
+          content: `Operators are used to perform operations on variables and values.
+                                                    <pre><code>| Operator | Example   | Meaning      |
+            | -------- | --------- | ------------ |
+            | =      | x = 5   | assign value |
+            | +=     | x += 2  | x = x + 2  |
+            | -=     | x -= 2  | x = x - 2  |
+            | *=     | x *= 2  | x = x * 2  |
+            | /=     | x /= 2  | x = x / 2  |
+            | %=     | x %= 2  | x = x % 2  |
+            | **=    | x **= 2 | x = x ** 2 |
+
+            </code></pre>`,
+        },
+        {
+          title: "Comparison Operators (return true or false)",
+          content: `Operators are used to perform operations on variables and values.
+                                                    <pre><code>| Operator | Example     | Result                                           |
+            | -------- | ----------- | ------------------------------------------------ |
+            | ==     | 5 == "5"  | true (loose equality, type conversion allowed) |
+            | ===    | 5 === "5" | false (strict equality, no type conversion)    |
+            | !=     | 5 != "5"  | false                                          |
+            | !==    | 5 !== "5" | true                                           |
+            | >      | 5 > 2     | true                                           |
+            | <      | 5 < 2     | false                                          |
+            | >=     | 5 >= 5    | true                                           |
+            | <=     | 5 <= 4    | false                                          |
+            </code></pre>`,
+        },
+        {
+          title: "Logical Operators",
+          content: `Operators are used to perform operations on variables and values.
+                                                    <pre><code>| Operator | Example           | Result        |
+            | -------- | ----------------- | ------------- |
+            | &&     | true && false   | false (AND) |
+            | \|\|   | true \|\| false | true (OR)   |
+            | !      | !true           | false (NOT) |
+            </code></pre>`,
+        },
+        {
+          title: "String Operators",
+          content: `Operators are used to perform operations on variables and values.
+                                                    <pre><code>
+            | Operator | Example              | Result            |
+            | -------- | -------------------- | ----------------- |
+            | +      | "Hello" + " World" | "Hello World"   |
+            | +=     | text += "!"        | appends to string |
+            </code></pre>`,
+        },
+        {
+          title: "Ternary Operator",
+          content: `Operators are used to perform operations on variables and values.
+                                                    <pre><code>
+            let age = 18;
+            let canVote = (age >= 18) ? "Yes" : "No";
+
+            </code></pre>`,
+        },
+        {
+          title: "Conditional Statements: If/Else",
+          content: `Control flow statements allow you to execute code based on certain conditions.
+                                                    <pre><code>let temperature = 25;
+                                    if (temperature > 30) {
+                                      console.log('It is hot!');
+                                    } else if (temperature > 20) {
+                                      console.log('It is warm.');
+                                    } else {
+                                      console.log('It is cold.');
+                                    }</code></pre>`,
+        },
+        {
+          title: "Conditional Statements: Switch",
+          content: `The switch statement is used to perform different actions based on different conditions.
+                                                    <pre><code>let day = 'Monday';
+                                    switch (day) {
+                                      case 'Monday':
+                                        console.log('Start of the week.');
+                                        break;
+                                      case 'Friday':
+                                        console.log('End of the week.');
+                                        break;
+                                      default:
+                                        console.log('Mid-week.');
+                                    }</code></pre>`,
+        },
+        {
+          title: "All Loops",
+          content: `Loops are used to repeat a block of code until a certain condition is met.
+                                                    <pre><code>// The standard 'for' loop
+            for (let i = 0; i < 3; i++) {
+              console.log('For loop count: ' + i); // 0, 1, 2
+            }
+
+            // The 'while' loop
+             let count = 0;
+            while (count < 3) {
+              console.log('While loop count: ' + count); // 0, 1, 2
+              count++;
+            }
+
+             // The 'do...while' loop (always runs at least once)
+             let x = 0;
+            do {
+              console.log('Do...while count: ' + x); // 0
+              x++;
+            } while (x < 1);
+
+             // The 'for...in' loop (iterates over object properties)
+             const car = { make: 'Ford', model: 'Focus' };
+             for (let key in car) {
+               console.log(key + ': ' + car[key]); // make: Ford, model: Focus
+             }
+
+             // The 'for...of' loop (iterates over iterable values like arrays)
+             const numbers = [10, 20, 30];
+             for (let num of numbers) {
+               console.log(num); // 10, 20, 30
+             }</code></pre>`,
+        },
+        {
+          title: "All Functions",
+          content: `Functions are blocks of code designed to perform a particular task.
+                                                    <pre><code>// Function Declaration (hoisted)
+                                    function greet(name) {
+                                      return 'Hello, ' + name + '!';
+                                    }
+                                    console.log(greet('Bob')); // Output: Hello, Bob!
+
+                                    // Function Expression
+                                    const add = function(a, b) {
+                                      return a + b;
+                                    };
+                                    console.log(add(2, 3));    // Output: 5
+
+                                    // Arrow Function (concise syntax, modern)
+                                    const multiply = (a, b) => a * b;
+                                    console.log(multiply(2, 3)); // Output: 6
+
+                                    // Immediately Invoked Function Expression (IIFE)
+                                    (function() {
+                                      let message = "This runs immediately.";
+                                      console.log(message);
+                                    })(); // Output: This runs immediately.</code></pre>`,
+        },
+        {
+          title: "Objects",
+          content: `Objects are collections of key-value pairs. They are used to represent real-world entities.
+                                                    <pre><code>let person = {
+                                      firstName: 'Jane',
+                                      lastName: 'Doe',
+                                      user.country = "India";
+                                      age: 28,
+                                      greet: function() {
+                                        return 'Hello, my name is ' + this.firstName;
+                                      }
+                                    };
+                                    console.log(person.greet()); // Output: Hello, my name is Jane
+
+                                    // Updating a property's value
+                                    person.age = 29;
+                                    console.log(person.age); // Output: 29
+
+                                    // Add a property's value
+                                    person["email"] = "jane@example.com";
+
+                                    // Deleting property's value
+                                    delete person.country;
+                                    console.log(person);
+                                    // { name: "Jane", age: 29, email: "jane@example.com" }
+                                     </code></pre>`,
+        },
+        {
+          title: "Arrays",
+          content: `Arrays are used to store multiple values in a single variable. You can use methods to manipulate them.
+                                                    <pre><code>let colors = ['red', 'green', 'blue'];
+                                    colors.push('yellow'); // Add to the end
+                                    let lastColor = colors.pop(); // Remove from the end
+                                    console.log(colors); // Output: ["red", "green", "blue"]</code></pre>`,
+        },
+        {
+          title: "Array Iteration Methods",
+          content: `Modern JavaScript provides powerful methods for iterating over arrays.
+                                                    <pre><code>let numbers = [1, 2, 3];
+
+                                    // forEach
+                                    numbers.forEach(num => console.log(num * 2)); // 2, 4, 6
+
+                                    // map (creates a new array)
+                                    let doubled = numbers.map(num => num * 2); // [2, 4, 6]
+
+                                    // filter (creates a new array with a subset of elements)
+                                    let evenNumbers = numbers.filter(num => num % 2 === 0); // [2]</code></pre>`,
+        },
+
+        {
+          title: "Error Handling: Try/Catch",
+          content: `The try...catch statement is used to handle errors that may occur during code execution.
+                                                    <pre><code>try {
+                                      // This code might throw an error
+                                      let result = someNonExistentFunction();
+                                    } catch (error) {
+                                      // This code runs if an error occurs
+                                      console.log('An error occurred: ' + error.message);
+                                    }</code></pre>`,
+        },
+
+        {
+          title: "Asynchronous JavaScript (Promises)",
+          content: `Promises are a way to handle asynchronous operations. They represent a value that may be available now, or in the future, or never.
+                                                    <pre><code>const myPromise = new Promise((resolve, reject) => {
+                                      setTimeout(() => {
+                                        resolve('Promise resolved!');
+                                      }, 1000);
+                                    });
+                                    myPromise.then(message => console.log(message)); // Output: Promise resolved!</code></pre>`,
+        },
+        {
+          title: "Modules (ESM)",
+          content: `JavaScript Modules allow you to break your code into separate files for better organization and reusability. You can export and import functions or variables.
+                                                    <pre><code>// In file "math.js"
+                                    export function add(a, b) {
+                                      return a + b;
+                                    }
+
+                                    // In file "main.js"
+                                    import { add } from './math.js';
+                                    console.log(add(2, 3)); // Output: 5</code></pre>`,
+        },
+      ];
+      let currentSlideIndex = 0;
+      const slidesContainer = document.getElementById("slides-container");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const progressFill = document.getElementById("progress-fill");
+
+      /**
+       * Dynamically generates the slides from the slidesData array.
+       */
+      function createSlides() {
+        slidesData.forEach((slide, index) => {
+          const slideDiv = document.createElement("div");
+          slideDiv.className = "slide";
+          slideDiv.setAttribute("data-index", index);
+
+          const title = document.createElement("h2");
+          title.className = "slide-title";
+          title.textContent = slide.title;
+
+          const content = document.createElement("p");
+          content.className = "slide-content";
+          content.innerHTML = slide.content;
+
+          slideDiv.appendChild(title);
+          slideDiv.appendChild(content);
+          slidesContainer.appendChild(slideDiv);
+        });
+      }
+
+      /**
+       * Displays the slide at the given index.
+       * @param {number} index The index of the slide to show.
+       */
+      function showSlide(index) {
+        const slides = document.querySelectorAll(".slide");
+        // Hide all slides
+        slides.forEach((slide) => {
+          slide.classList.remove("active");
+        });
+        // Show the active slide
+        if (slides[index]) {
+          slides[index].classList.add("active");
+        }
+      }
+
+      /**
+       * Updates the navigation buttons' disabled state and the progress bar.
+       */
+      // function updateUI() {
+      //   prevBtn.disabled = currentSlideIndex === 0;
+      //   nextBtn.disabled = currentSlideIndex === slidesData.length - 1;
+
+      //   const progress = ((currentSlideIndex + 1) / slidesData.length) * 100;
+      //   progressFill.style.width = `${progress}%`;
+      // }
+      function updateUI() {
+        prevBtn.disabled = currentSlideIndex === 0;
+        nextBtn.disabled = currentSlideIndex === slidesData.length - 1;
+
+        const progress = ((currentSlideIndex + 1) / slidesData.length) * 100;
+        progressFill.style.height = `${progress}%`;
+      }
+
+      /**
+       * Handles the "Next" button click.
+       */
+      function handleNext() {
+        if (currentSlideIndex < slidesData.length - 1) {
+          currentSlideIndex++;
+          showSlide(currentSlideIndex);
+          updateUI();
+        }
+      }
+
+      /**
+       * Handles the "Previous" button click.
+       */
+      function handlePrevious() {
+        if (currentSlideIndex > 0) {
+          currentSlideIndex--;
+          showSlide(currentSlideIndex);
+          updateUI();
+        }
+      }
+
+      // Add event listeners for keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") {
+          handleNext();
+        } else if (e.key === "ArrowLeft") {
+          handlePrevious();
+        }
+      });
+
+      // Add event listeners to the navigation buttons
+      nextBtn.addEventListener("click", handleNext);
+      prevBtn.addEventListener("click", handlePrevious);
+
+      // Initial setup on page load
+      window.onload = function () {
+        createSlides();
+        showSlide(currentSlideIndex);
+        updateUI();
+      };
+    </script>
+  </body>
+</html>
